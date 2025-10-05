@@ -1,112 +1,229 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  View, 
+  TouchableOpacity, 
+  ScrollView, 
+  TextInput,
+  Switch,
+  Alert,
+  StyleSheet
+} from 'react-native';
+import { Link } from 'expo-router';
+import { ThemedText } from '../../components/themed-text';
+import { ThemedView } from '../../components/themed-view';
+import LocationPicker from '../../components/location-picker';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+export default function QueryBuilder() {
+  const [location, setLocation] = useState('');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [parameters, setParameters] = useState({
+    temperature: true,
+    precipitation: false,
+    wind: false,
+    humidity: false,
+  });
 
-export default function TabTwoScreen() {
+  const toggleParameter = (param: keyof typeof parameters) => {
+    setParameters(prev => ({
+      ...prev,
+      [param]: !prev[param]
+    }));
+  };
+
+  const handleLocationSelect = (locationData: { lat: number; lng: number; address?: string }) => {
+    setCoordinates({ lat: locationData.lat, lng: locationData.lng });
+    if (locationData.address) {
+      setLocation(locationData.address);
+    }
+  };
+
+  const canProceed = () => {
+    if (!coordinates) {
+      Alert.alert('Location Required', 'Please select a location on the map');
+      return false;
+    }
+    
+    const selectedParams = Object.values(parameters).filter(Boolean);
+    if (selectedParams.length === 0) {
+      Alert.alert('Parameters Required', 'Please select at least one weather parameter');
+      return false;
+    }
+
+    return true;
+  };
+
+  const getSelectedParameters = () => {
+    return Object.entries(parameters)
+      .filter(([_, enabled]) => enabled)
+      .map(([key]) => key);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+    <ScrollView style={styles.container}>
+      <ThemedText type="title" style={styles.title}>Build Your Query</ThemedText>
+
+      {/* Location Picker */}
+      <ThemedView style={styles.card}>
+        <ThemedText type="subtitle" style={styles.cardTitle}>
+          📍 Select Location
+        </ThemedText>
+        <LocationPicker onLocationSelect={handleLocationSelect} />
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Or enter location manually..."
+          value={location}
+          onChangeText={setLocation}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
+      </ThemedView>
+
+      {/* Date Selection */}
+      <ThemedView style={styles.card}>
+        <ThemedText type="subtitle" style={styles.cardTitle}>
+          📅 Date Range
+        </ThemedText>
+        <ThemedText style={{ marginBottom: 10 }}>
+          Analyzing historical data for: {selectedDate.toDateString()}
+        </ThemedText>
+        <ThemedText style={styles.note}>
+          Note: We analyze 10 years of historical data around your selected date
         </ThemedText>
       </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+
+      {/* Weather Parameters */}
+      <ThemedView style={styles.card}>
+        <ThemedText type="subtitle" style={styles.cardTitle}>
+          🌡️ Weather Parameters
         </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
+        <ThemedText style={styles.note}>
+          Select the weather conditions you want to analyze
         </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
+        
+        {Object.entries(parameters).map(([key, value]) => (
+          <View key={key} style={styles.parameterRow}>
+            <View>
+              <ThemedText style={styles.parameterText}>
+                {key === 'temperature' && '🌡️ Temperature'}
+                {key === 'precipitation' && '💧 Precipitation'}
+                {key === 'wind' && '💨 Wind Speed'}
+                {key === 'humidity' && '💦 Humidity'}
+              </ThemedText>
+              <ThemedText style={styles.parameterDescription}>
+                {key === 'temperature' && 'Heat and cold probabilities'}
+                {key === 'precipitation' && 'Rain and snow likelihood'}
+                {key === 'wind' && 'Wind speed analysis'}
+                {key === 'humidity' && 'Humidity and comfort levels'}
+              </ThemedText>
+            </View>
+            <Switch
+              value={value}
+              onValueChange={() => toggleParameter(key as keyof typeof parameters)}
+            />
+          </View>
+        ))}
+      </ThemedView>
+
+      {/* Run Query Button */}
+      {coordinates && (
+        <Link 
+          href={{ 
+            pathname: "/results", 
+            params: { 
+              latitude: coordinates.lat.toString(),
+              longitude: coordinates.lng.toString(),
+              location: location || `Lat: ${coordinates.lat.toFixed(4)}, Lng: ${coordinates.lng.toFixed(4)}`,
+              parameters: JSON.stringify(parameters),
+              date: selectedDate.toISOString()
+            }
+          }} 
+          asChild
+        >
+          <TouchableOpacity 
+            style={[
+              styles.button, 
+              { backgroundColor: '#ed8936' }
+            ]}
+            onPress={(e) => {
+              if (!canProceed()) {
+                e.preventDefault();
+              }
+            }}
+          >
+            <ThemedText style={styles.buttonText}>
+              📊 Analyze Weather Probability
             </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+          </TouchableOpacity>
+        </Link>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    padding: 20,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  title: {
+    fontSize: 28,
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+    marginVertical: 10,
+  },
+  cardTitle: {
+    marginBottom: 15,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    padding: 15,
+    borderRadius: 10,
+    fontSize: 16,
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: '#3182ce',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  parameterRow: {
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0'
+  },
+  parameterText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  parameterDescription: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  note: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+    marginBottom: 10,
   },
 });

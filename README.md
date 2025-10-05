@@ -1,7 +1,7 @@
 # 🌤️ NASA Weather Probability Analysis
 
 <p align="center">
-  <img src="A_README.md_file_for_a_React_Native_mobile_applica.png" alt="NASA Banner" width="100%">
+  <img src="https://i.ibb.co/1Ybr2fPz/unnamed-1-1.jpg" alt="APP Banner" width="100%">
 </p>
 
 <p align="center">
@@ -9,7 +9,7 @@
   <br/>
   <a href="https://github.com/yashasrnair/nasa"><strong>Explore the docs »</strong></a>
   <br/>
-  <a href="#">View Demo</a> ·
+  <a href="https://github.com/yashasrnair/nasa/releases">View Demo</a> ·
   <a href="https://github.com/yashasrnair/nasa/issues">Report Bug</a> ·
   <a href="https://github.com/yashasrnair/nasa/pulls">Request Feature</a>
 </p>
@@ -35,15 +35,7 @@ Unlike traditional apps that show deterministic weather predictions, this app pr
 
 ---
 
-## 📱 App Screenshots
 
-<p align="center">
-  <img src="assets/screens/home.png" alt="Home Screen" width="30%">
-  <img src="assets/screens/query.png" alt="Query Screen" width="30%">
-  <img src="assets/screens/results.png" alt="Results Screen" width="30%">
-</p>
-
----
 
 ## 🧩 Resources & Tools Used
 
